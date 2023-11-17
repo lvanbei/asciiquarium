@@ -1,7 +1,17 @@
+import threading
 import subprocess
 from gpiozero import MotionSensor
 from datetime import datetime
-import requests
+
+def setInterval(func,time):
+    e = threading.Event()
+    while not e.wait(time):
+        func()
+
+def setTimeout(func, time):
+    e = threading.Event()
+    e.wait(time)
+    func()
 
 def runAquarium():
     res = subprocess.Popen("/usr/bin/asciiquarium", text=True)
@@ -18,31 +28,26 @@ def turnOnDisplay():
        exit(-1)
     #print("turn on")
 
-def sendNotification(msg):
-    url = "https://ntfy.leotech.cc/asciiquarium"
-    auth = ("leo", "@5AFwXsX65AF")
-    requests.post(url, auth=auth, data=msg)
-
-def saveLogs(msg):
-    sendNotification(msg)
-    now = datetime.now()
-    date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
-    file1 = open("logs.txt", "a")  # append mode
-    file1.write(date_time + " : " + msg + "\n")
-    file1.close()
-
+e = threading.Event()
 try:
     pir = MotionSensor(17)
 except:
     exit(-1)
-shutdownDisplay()
-runAquarium()
+#shutdownDisplay()
+#runAquarium()
+print("init done");
 while True:
+    now = datetime.now()
+    date_time = now.strftime("%H:%M:%S")
     pir.wait_for_motion()
-    saveLogs("I'm seeing someone !")
-    turnOnDisplay()
+    now = datetime.now()
+    date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
+    print(date_time + " : human")
+    #turnOnDisplay()
     pir.wait_for_no_motion()
-    saveLogs("No one is here.")
-    shutdownDisplay()
+    now = datetime.now()
+    date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
+    print(date_time + " : looking")
+    #shutdownDisplay()
 
 
