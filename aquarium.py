@@ -1,7 +1,9 @@
 import subprocess
-from gpiozero import MotionSensor
 from datetime import datetime
+
 import requests
+from gpiozero import MotionSensor
+
 
 def runAquarium():
     res = subprocess.Popen("/usr/bin/asciiquarium", text=True)
@@ -19,17 +21,25 @@ def turnOnDisplay():
     #print("turn on")
 
 def sendNotification(msg):
-    url = "https://ntfy.leotech.cc/asciiquarium"
-    auth = ("leo", "@5AFwXsX65AF")
-    requests.post(url, auth=auth, data=msg)
+    try:
+        url = "https://ntfy.leotech.cc/asciiquarium"
+        auth = ("leo", "@5AFwXsX65AF")
+        requests.post(url, auth=auth, data=msg)
+        return True
+    except:
+        return False
 
 def saveLogs(msg):
-    sendNotification(msg)
-    now = datetime.now()
-    date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
-    file1 = open("logs.txt", "a")  # append mode
-    file1.write(date_time + " : " + msg + "\n")
-    file1.close()
+    try:
+        sendNotification(msg)
+        now = datetime.now()
+        date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
+        file1 = open("logs.txt", "a")  # append mode
+        file1.write(date_time + " : " + msg + "\n")
+        file1.close()
+        return True
+    except:
+        return False
 
 try:
     pir = MotionSensor(17)
